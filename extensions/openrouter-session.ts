@@ -114,7 +114,7 @@ export default function (pi: ExtensionAPI) {
     }
 
     // Method 2: current model's provider field
-    if (!isOpenRouter && ctx.model?.provider === "openrouter") {
+    if (!isOpenRouter && ctx.model?.provider?.match(/(?:^|\W)openrouter(?:$|\W)/)) {
       isOpenRouter = true;
     }
 
