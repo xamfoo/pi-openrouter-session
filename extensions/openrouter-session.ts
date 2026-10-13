@@ -34,7 +34,6 @@ export default function (pi: ExtensionAPI) {
   // Stable unique base derived from the session file name for this session lifetime.
   // Combined with the human-readable name (if set) to build the final session_id.
   let baseSessionId: string | null = null;
-  let lastLoggedSessionId: string | null = null;
 
   /**
    * Converts a human-readable session name into a URL/ID-safe slug.
@@ -73,9 +72,8 @@ export default function (pi: ExtensionAPI) {
   }
 
   // Establish the base session ID whenever the session starts, changes, or reloads
-  pi.on("session_start", async (_event, ctx) => {
+  pi.on("session_start", async (event, ctx) => {
     baseSessionId = null;
-    lastLoggedSessionId = null;
     const sessionFile = ctx.sessionManager.getSessionFile();
 
     if (sessionFile) {
@@ -93,10 +91,14 @@ export default function (pi: ExtensionAPI) {
       baseSessionId = `ephemeral-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     }
 
-    console.log(`[openrouter-session] Ready, base session ID: ${baseSessionId}`);
-
-    if (ctx.sessionManager.getEntries().length === 0) {
-      ctx.ui?.notify("OpenRouter session tracking enabled", "info");
+    // Notify through ctx.ui so the message renders inside the TUI transcript.
+    // Writing to console/stdout corrupts the fullscreen UI, which paints the
+    // cursor row (the prompt box) instead. Skip reload, where the ID is unchanged.
+    if (event.reason !== "reload") {
+      const sessionId = buildSessionId();
+      if (sessionId) {
+        ctx.ui?.notify(`OpenRouter session ID: ${sessionId}`, "info");
+      }
     }
   });
 
@@ -122,12 +124,6 @@ export default function (pi: ExtensionAPI) {
       // Resolve on every request - picks up any mid-session `/name` changes
       const sessionId = buildSessionId();
       if (sessionId) {
-        // Only log when the ID changes to avoid spamming the console
-        if (sessionId !== lastLoggedSessionId) {
-          console.log(`[openrouter-session] Using session_id: ${sessionId}`);
-          lastLoggedSessionId = sessionId;
-        }
-
         return {
           ...payload,
           session_id: sessionId,

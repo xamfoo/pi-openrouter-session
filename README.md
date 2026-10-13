@@ -111,9 +111,9 @@ Or select OpenRouter interactively:
 
 ### 3. Verify the Extension is Working
 
-When you start pi, you should see:
+When you start pi, a status line appears in the transcript:
 ```
-[openrouter-session] Ready, base session ID: 2026-05-06T12-00-00-000Z_019dbbc7-...
+OpenRouter session ID: 2026-05-06T12-00-00-000Z_019dbbc7-...
 ```
 
 ### 4. View Sessions in OpenRouter Console
@@ -180,13 +180,9 @@ Currently, the extension works automatically with no configuration required.
    /reload
    ```
 
-3. Check the logs for:
+3. Check that the startup status line appears in the transcript:
    ```
-   [openrouter-session] Ready, base session ID: ...
-   ```
-   And on the first OpenRouter request:
-   ```
-   [openrouter-session] Using session_id: ...
+   OpenRouter session ID: ...
    ```
 
 ### session_id Not Appearing in OpenRouter
